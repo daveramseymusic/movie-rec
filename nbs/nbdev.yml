@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "movie-rec"
+  site-url: "https://daveramseymusic.github.io/movie-rec"
+  description: "Movie Recommender"
+  repo-branch: main
+  repo-url: "https://github.com/daveramseymusic/movie-rec"
