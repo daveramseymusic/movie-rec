@@ -23,19 +23,6 @@ function to get movie recommendations similar to the movie saved in the
 
 ## Try it HERE
 
-``` python
-intf.launch(inline=True, #when True publishes the page in notebook
-    share=False) #when True automatically publishes the app to the gradio website for 72 hours.
-```
-
-    Running on local URL:  http://127.0.0.1:7862
-
-    To create a public link, set `share=True` in `launch()`.
-
-<div><iframe src="http://127.0.0.1:7862/" width="900" height="500" allow="autoplay; camera; microphone; clipboard-read; clipboard-write;" frameborder="0" allowfullscreen></iframe></div>
-
-    (<gradio.routes.App>, 'http://127.0.0.1:7862/', None)
-
 ## Simple example using the [`get_movie_recs`](https://daveramseymusic.github.io/movie-rec/movie_recommender.html#get_movie_recs) function
 
 ``` python
