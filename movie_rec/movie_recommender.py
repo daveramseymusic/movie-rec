@@ -34,7 +34,7 @@ def get_movie_recs(full_title:str, # String saved to `favorite_movie` variable
     idx = distances.argsort(descending=True)
     return [o for o in titles.title[idx.tolist()][:30]]
 
-# %% ../nbs/00_movie_recommender.ipynb 19
+# %% ../nbs/00_movie_recommender.ipynb 20
 def search_movies_n_recommend(favorite_movie:str, # The movie title typed into the `gr.Textbox()` that the user will see on the `gradio` app
                              learn, # Trained model
                               titles, # Movie titles df

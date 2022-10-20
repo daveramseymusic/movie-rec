@@ -21,8 +21,6 @@ function to get movie recommendations similar to the movie saved in the
 
 # Examples
 
-## Try it HERE
-
 ## Simple example using the [`get_movie_recs`](https://daveramseymusic.github.io/movie-rec/movie_recommender.html#get_movie_recs) function
 
 ``` python
