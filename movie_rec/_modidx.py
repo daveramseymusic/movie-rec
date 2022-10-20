@@ -7,5 +7,7 @@ d = { 'settings': { 'branch': 'main',
                 'lib_path': 'movie_rec'},
   'syms': { 'movie_rec.movie_recommender': { 'movie_rec.movie_recommender.get_movie_recs': ( 'movie_recommender.html#get_movie_recs',
                                                                                              'movie_rec/movie_recommender.py'),
+                                             'movie_rec.movie_recommender.search_movie_titles': ( 'movie_recommender.html#search_movie_titles',
+                                                                                                  'movie_rec/movie_recommender.py'),
                                              'movie_rec.movie_recommender.search_movies_n_recommend': ( 'movie_recommender.html#search_movies_n_recommend',
                                                                                                         'movie_rec/movie_recommender.py')}}}
