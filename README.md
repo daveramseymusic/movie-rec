@@ -24,7 +24,7 @@ function to get movie recommendations similar to the movie saved in the
 ## Simple example using the [`get_movie_recs`](https://daveramseymusic.github.io/movie-rec/movie_recommender.html#get_movie_recs) function
 
 ``` python
-get_movie_recs(full_title='Rushmore (1998)')
+get_movie_recs(full_title='Rushmore (1998)',learn=learn, df_titles=df_titles)
 ```
 
     ['Rushmore (1998)',
