@@ -3,6 +3,3 @@ website:
     contents:
       - index.ipynb
       - 00_movie_recommender.ipynb
-      - nbdev.yml
-      - sidebar.yml
-      - styles.css

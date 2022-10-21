@@ -88,5 +88,5 @@ intf = gr.Interface(fn=search_movies_n_recommend,
                     article='This recommender uses a collaborative filtering model fashioned from the [Fast.AI](https://github.com/fastai/fastbook/blob/master/08_collab.ipynb) library and trained on the 9 million movie reviews from the [Movie Lense Dataset](https://grouplens.org/datasets/movielens/25m/).  It trains Latent Factors to give movies and users descriptive weights that help predict thier reivews based on these factors.  The model was trained completely WITHOUT titles, descriptions, or categories and amazingly these things can be added to imporove this model.  Enjoy!')
 
 # %% ../nbs/00_movie_recommender.ipynb 25
-intf.launch(inline=False, #when True publishes the page in notebook
+intf.launch(inline=True, #when True publishes the page in notebook
         share=False) #when True automatically publishes the app to the gradio website for 72 hours. 

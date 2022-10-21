@@ -20,6 +20,10 @@ function to get movie recommendations similar to the movie saved in the
 `full_title` variable. It also shows how to use gradio to publish a
 usable version of the movie_recommender.
 
+## This is what it will look like:
+
+![example](example1.png)
+
 # A Simple example using the [`get_movie_recs`](https://daveramseymusic.github.io/movie-rec/movie_recommender.html#get_movie_recs) function
 
 ``` python
