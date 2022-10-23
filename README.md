@@ -20,11 +20,15 @@ function to get movie recommendations similar to the movie saved in the
 `full_title` variable. It also shows how to use gradio to publish a
 usable version of the movie_recommender.
 
-## This is what it will look like:
+# [Click Here](https://daveramseymusic.github.io/movie-rec/movie_recommender.html#actually-try-the-model-here) to Try the Model Out with Your Favorite Movie
+
+> This links to a place in the documentation where you can use the model
+
+### This is what it will look like:
 
 ![example](example1.png)
 
-# A Simple example using the [`get_movie_recs`](https://daveramseymusic.github.io/movie-rec/movie_recommender.html#get_movie_recs) function
+## A Simple example using the [`get_movie_recs`](https://daveramseymusic.github.io/movie-rec/movie_recommender.html#get_movie_recs) function
 
 ``` python
 get_movie_recs(full_title='Rushmore (1998)',learn=learn, df_titles=df_titles)
