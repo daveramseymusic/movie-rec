@@ -1,0 +1,58 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome Dave’s Fastai Movie Recommender",
+    "section": "",
+    "text": "This file will become your README and also the index of your documentation."
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "Welcome Dave’s Fastai Movie Recommender",
+    "section": "Install",
+    "text": "Install\npip install movie_recommender"
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "Welcome Dave’s Fastai Movie Recommender",
+    "section": "How to use",
+    "text": "How to use\nThis lib provides a get_movie_recs function to get movie recommendations similar to the movie saved in the full_title variable. It also shows how to use gradio to publish a usable version of the movie_recommender."
+  },
+  {
+    "objectID": "index.html#a-simple-example-using-the-get_movie_recs-function",
+    "href": "index.html#a-simple-example-using-the-get_movie_recs-function",
+    "title": "Welcome Dave’s Fastai Movie Recommender",
+    "section": "A Simple example using the get_movie_recs function",
+    "text": "A Simple example using the get_movie_recs function\n\nget_movie_recs(full_title='Rushmore (1998)',learn=learn, df_titles=df_titles)\n\n['Rushmore (1998)',\n 'Being John Malkovich (1999)',\n 'Royal Tenenbaums, The (2001)',\n 'Punch-Drunk Love (2002)',\n 'Crimes and Misdemeanors (1989)',\n 'Heavenly Creatures (1994)',\n 'Blue Ruin (2013)',\n 'Fargo (1996)',\n 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1964)',\n 'Rififi (Du rififi chez les hommes) (1955)',\n 'Lost in Translation (2003)',\n 'Great Dictator, The (1940)',\n 'Eternal Sunshine of the Spotless Mind (2004)',\n 'Hearts of Darkness: A Filmmakers Apocalypse (1991)',\n 'Fireworks (Hana-bi) (1997)',\n 'Adaptation (2002)',\n 'Bob Roberts (1992)',\n 'Cabinet of Dr. Caligari, The (Cabinet des Dr. Caligari., Das) (1920)',\n 'Ghost World (2001)',\n 'Brazil (1985)',\n 'Baraka (1992)',\n 'City of Lost Children, The (Cité des enfants perdus, La) (1995)',\n 'Three Colors: Blue (Trois couleurs: Bleu) (1993)',\n 'Player, The (1992)',\n 'There Will Be Blood (2007)',\n 'Ran (1985)',\n 'Sexy Beast (2000)',\n 'Nebraska (2013)',\n 'Delicatessen (1991)',\n 'Tale of Two Sisters, A (Janghwa, Hongryeon) (2003)']"
+  },
+  {
+    "objectID": "movie_recommender.html",
+    "href": "movie_recommender.html",
+    "title": "FastAI Movie Recommender Step-by-Step",
+    "section": "",
+    "text": "Fastai is the library we use to train, load and run our model. NB: we already trained our model so we’ll only be loading it here.\n\n# !pip install -Uqq fastai\n\nGradio allows you to easily publish your model onto the web for peope to use.\n\n# !pip install -Uqq gradio\n\nnbdev is what we’re using to make this documentation easier and more presentable.\n\n# !pip install nbdev\n\nThese are the libraries we need\n\n# For modeling\nfrom fastai.tabular.all import *\nfrom fastai.collab import *\n#for publishing the model\nimport gradio as gr"
+  },
+  {
+    "objectID": "movie_recommender.html#actually-try-the-model-here",
+    "href": "movie_recommender.html#actually-try-the-model-here",
+    "title": "FastAI Movie Recommender Step-by-Step",
+    "section": "Actually Try the Model HERE",
+    "text": "Actually Try the Model HERE\n\nNow we launch it so it can be used literally here in the jupyter notebook\n\n\nintf.launch(inline=True, #when True publishes the page in notebook\n        share=False, quiet=True, width=600, height=700) #when share=True automatically publishes the app to the gradio website for 72 hours.\n\nRunning on local URL:  http://127.0.0.1:7862\n\n\n\n\n\n(<gradio.routes.App>, 'http://127.0.0.1:7862/', None)"
+  },
+  {
+    "objectID": "movie_recommender.html#example-without-gradio",
+    "href": "movie_recommender.html#example-without-gradio",
+    "title": "FastAI Movie Recommender Step-by-Step",
+    "section": "Example Without Gradio:",
+    "text": "Example Without Gradio:\n\nHere is an example of the model being used straight from the get_movie_recs function, recommending movies similar to one of my favorites.\n\n\nfavorite_movie = 'Beasts of the Southern Wild (2012)'\nget_movie_recs(full_title=favorite_movie, learn=learn, df_titles=df_titles)\n\n['Beasts of the Southern Wild (2012)',\n 'No Country for Old Men (2007)',\n 'Wrestler, The (2008)',\n 'Leaving Las Vegas (1995)',\n 'City of God (Cidade de Deus) (2002)',\n 'Talk to Her (Hable con Ella) (2002)',\n 'Antichrist (2009)',\n 'Nocturnal Animals',\n 'Requiem for a Dream (2000)',\n 'Magnolia (1999)',\n 'In the Company of Men (1997)',\n 'Old Boy (2003)',\n 'Enemy (2013)',\n '12 Angry Men (1957)',\n 'Samouraï, Le (Godson, The) (1967)',\n 'Bringing Out the Dead (1999)',\n 'Eyes Wide Shut (1999)',\n 'Mulholland Drive (2001)',\n 'Punch-Drunk Love (2002)',\n 'Shallow Grave (1994)',\n 'Birdman: Or (The Unexpected Virtue of Ignorance) (2014)',\n 'Taxi Driver (1976)',\n 'Black Swan (2010)',\n 'American Beauty (1999)',\n 'Broken Flowers (2005)',\n \"Winter's Bone (2010)\",\n 'Little Miss Sunshine (2006)',\n 'Hunt, The (Jagten) (2012)',\n 'Control (2007)',\n 'The Machinist (2004)']"
+  },
+  {
+    "objectID": "movie_recommender.html#how-does-this-work",
+    "href": "movie_recommender.html#how-does-this-work",
+    "title": "FastAI Movie Recommender Step-by-Step",
+    "section": "How does this work?",
+    "text": "How does this work?\n\nClick HERE for the full fast.ai lesson explaination.\n\nThe model is trained on 3 pieces of data. Movie_Id, User_Id, and Movie_Rating. So how can we discern which movies are similar to each other? The answer is “Latent Factors.”\nHow do Latent factors work? > Let’s say john loves movies that score high in 3 categories: Action, Science Fiction Old(though old he doesn’t care about as much). we can reprsent this as an array with scores between -1 and 1: [Action, Scifi, Old]\n\njohn = np.array([1,1,.8]) # [action, scifi, old]\n\nNow we look a the movie The Last Skywalker and score that with the same system. It has a lot of action but not craaazy amounts action so we’ll score that .9. It’s definitely scifi so we score that 1 but it isn’t old so we’l score that -.9.\n\nlast_skywalker = np.array([1,.9,-.9])\n\nNow we multiply those together to create a matching score\n\njohn*last_skywalker\n\narray([1.  , 1.  , 0.64])\n\n\nThen we can sum it together to get a single score:\n\n(john*last_skywalker).sum()\n\n2.64\n\n\nThis is called the dot product."
+  }
+]

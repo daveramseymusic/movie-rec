@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An app where you can type in your favorite movie and it will suggest 30 movies similar to i t using a collaborative filtering model trained on over 9million movie reviews.">
+
+<title>movie-rec - FastAI Movie Recommender Step-by-Step</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="movie-rec - FastAI Movie Recommender Step-by-Step">
+<meta property="og:description" content="An app where you can type in your favorite movie and it will suggest 30 movies similar to i t using a collaborative filtering model trained on over 9million movie reviews.">
+<meta property="og:site-name" content="movie-rec">
+<meta name="twitter:title" content="movie-rec - FastAI Movie Recommender Step-by-Step">
+<meta name="twitter:description" content="An app where you can type in your favorite movie and it will suggest 30 movies similar to i t using a collaborative filtering model trained on over 9million movie reviews.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">movie-rec</span>
+    </a>
+  </div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">FastAI Movie Recommender Step-by-Step</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Welcome Dave’s Fastai Movie Recommender</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./movie_recommender.html" class="sidebar-item-text sidebar-link active">FastAI Movie Recommender Step-by-Step</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#makes-sure-all-your-libraries-and-packages-are-installed-and-loaded." id="toc-makes-sure-all-your-libraries-and-packages-are-installed-and-loaded." class="nav-link active" data-scroll-target="#makes-sure-all-your-libraries-and-packages-are-installed-and-loaded.">Makes sure all your libraries and packages are installed and loaded.</a></li>
+  <li><a href="#load-model-and-data-loaders-or-movie-title-csv" id="toc-load-model-and-data-loaders-or-movie-title-csv" class="nav-link" data-scroll-target="#load-model-and-data-loaders-or-movie-title-csv">Load model and data loaders or movie title csv</a></li>
+  <li><a href="#functions-for-model-inference" id="toc-functions-for-model-inference" class="nav-link" data-scroll-target="#functions-for-model-inference">Functions for Model Inference</a></li>
+  <li><a href="#get_movie_recs" id="toc-get_movie_recs" class="nav-link" data-scroll-target="#get_movie_recs">get_movie_recs</a></li>
+  <li><a href="#search_movie_titles" id="toc-search_movie_titles" class="nav-link" data-scroll-target="#search_movie_titles">search_movie_titles</a></li>
+  <li><a href="#search_movies_n_recommend" id="toc-search_movies_n_recommend" class="nav-link" data-scroll-target="#search_movies_n_recommend">search_movies_n_recommend</a></li>
+  <li><a href="#gradio-for-publishing-the-model" id="toc-gradio-for-publishing-the-model" class="nav-link" data-scroll-target="#gradio-for-publishing-the-model">Gradio For Publishing the Model</a></li>
+  <li><a href="#actually-try-the-model-here" id="toc-actually-try-the-model-here" class="nav-link" data-scroll-target="#actually-try-the-model-here">Actually Try the Model HERE</a></li>
+  <li><a href="#example-without-gradio" id="toc-example-without-gradio" class="nav-link" data-scroll-target="#example-without-gradio">Example Without Gradio:</a></li>
+  <li><a href="#how-does-this-work" id="toc-how-does-this-work" class="nav-link" data-scroll-target="#how-does-this-work">How does this work?</a></li>
+  <li><a href="#lets-try-another-movie" id="toc-lets-try-another-movie" class="nav-link" data-scroll-target="#lets-try-another-movie">Let’s try another movie</a>
+  <ul class="collapse">
+  <li><a href="#can-we-add-more-categories-and-info" id="toc-can-we-add-more-categories-and-info" class="nav-link" data-scroll-target="#can-we-add-more-categories-and-info">Can we add more categories and Info?</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/daveramseymusic/movie-rec/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">FastAI Movie Recommender Step-by-Step</h1>
+</div>
+
+<div>
+  <div class="description">
+    An app where you can type in your favorite movie and it will suggest 30 movies similar to i t using a collaborative filtering model trained on over 9million movie reviews.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="makes-sure-all-your-libraries-and-packages-are-installed-and-loaded." class="level3">
+<h3 class="anchored" data-anchor-id="makes-sure-all-your-libraries-and-packages-are-installed-and-loaded.">Makes sure all your libraries and packages are installed and loaded.</h3>
+<p><a href="https://youtu.be/p4ZZq0736Po?t=3724">Fastai</a> is the library we use to train, load and run our model. NB: we already trained our model so we’ll only be loading it here.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># !pip install -Uqq fastai</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><a href="https://gradio.app/getting_started/">Gradio</a> allows you to easily publish your model onto the web for peope to use.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># !pip install -Uqq gradio</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><a href="https://nbdev.fast.ai/tutorials/tutorial.html">nbdev</a> is what we’re using to make this documentation easier and more presentable.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># !pip install nbdev</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>These are the libraries we need</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For modeling</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.tabular.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.collab <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#for publishing the model</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> gradio <span class="im">as</span> gr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="load-model-and-data-loaders-or-movie-title-csv" class="level3">
+<h3 class="anchored" data-anchor-id="load-model-and-data-loaders-or-movie-title-csv">Load model and data loaders or movie title csv</h3>
+<p>The dataloaders we used to train the model from the 18 million reviews were 200MB so we use a csv instead. To convert from data loaders to pandas DataFrame use code hashtagged out just below</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># titles = pd.DataFrame(dls.classes['title']).reset_index() #create df from data loaders(dls)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># titles = titles.rename(columns={'index':'midx',0:'title'}) # rename columns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="functions-for-model-inference" class="level3">
+<h3 class="anchored" data-anchor-id="functions-for-model-inference">Functions for Model Inference</h3>
+<hr>
+<p><a href="https://github.com/daveramseymusic/movie-rec/blob/main/movie_rec/movie_recommender.py#L26" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_movie_recs" class="level3">
+<h3 class="anchored" data-anchor-id="get_movie_recs">get_movie_recs</h3>
+<blockquote class="blockquote">
+<pre><code> get_movie_recs (full_title:str, learn,
+                 df_titles:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<p>This function will use the <code>nn.CosineSimilarity</code> on the 50 latent factors for each movie to find the 30 movies most similar to your favorite movie.</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>full_title</td>
+<td>str</td>
+<td>String saved to <code>favorite_movie</code> variable</td>
+</tr>
+<tr class="even">
+<td>learn</td>
+<td></td>
+<td>Trained Model</td>
+</tr>
+<tr class="odd">
+<td>df_titles</td>
+<td>DataFrame</td>
+<td>DataFrame with all movie titles from dls</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/daveramseymusic/movie-rec/blob/main/movie_rec/movie_recommender.py#L38" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="search_movie_titles" class="level3">
+<h3 class="anchored" data-anchor-id="search_movie_titles">search_movie_titles</h3>
+<blockquote class="blockquote">
+<pre><code> search_movie_titles (favorite_movie:str,
+                      df_titles:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<p>This Function searches through df_titles[‘title’] column for titles that contian words saved in the <code>favorite_movie</code> variable after making all words lowercase and removing THE from the start of a title</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>favorite_movie</td>
+<td>str</td>
+<td>String saved to <code>favorite_movie</code> variable</td>
+</tr>
+<tr class="even">
+<td>df_titles</td>
+<td>DataFrame</td>
+<td>DataFrame with all movie titles located in the column <code>title</code> from dls</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/daveramseymusic/movie-rec/blob/main/movie_rec/movie_recommender.py#L60" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="search_movies_n_recommend" class="level3">
+<h3 class="anchored" data-anchor-id="search_movies_n_recommend">search_movies_n_recommend</h3>
+<blockquote class="blockquote">
+<pre><code> search_movies_n_recommend (favorite_movie:str, learn,
+                            df_titles:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<p>This function returns 30 recommendations using <a href="https://daveramseymusic.github.io/movie-rec/movie_recommender.html#search_movie_titles"><code>search_movie_titles</code></a> and <a href="https://daveramseymusic.github.io/movie-rec/movie_recommender.html#get_movie_recs"><code>get_movie_recs</code></a>.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>favorite_movie</td>
+<td>str</td>
+<td>The movie title typed into the <code>gr.Textbox()</code> that the user will see on the <code>gradio</code> app</td>
+</tr>
+<tr class="even">
+<td>learn</td>
+<td></td>
+<td>Trained model</td>
+</tr>
+<tr class="odd">
+<td>df_titles</td>
+<td>DataFrame</td>
+<td>Movie titles df</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="gradio-for-publishing-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="gradio-for-publishing-the-model">Gradio For Publishing the Model</h3>
+<blockquote class="blockquote">
+<p>Now we use <code>gr.Interface()</code> to create a block that contains our <a href="https://daveramseymusic.github.io/movie-rec/movie_recommender.html#search_movies_n_recommend"><code>search_movies_n_recommend</code></a> fuction as well as variables that dictate what will be shown once we publish it on <code>gradio</code></p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>intf <span class="op">=</span> gr.Interface(fn<span class="op">=</span>search_movies_n_recommend,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                    inputs<span class="op">=</span>gr.Textbox(lines<span class="op">=</span><span class="dv">1</span>,placeholder<span class="op">=</span><span class="st">"Put Your Favorite Movie Here To See Similar Movie Recommendations..."</span>),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                    outputs<span class="op">=</span>[<span class="st">"text"</span>,<span class="st">"text"</span>],</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                    examples<span class="op">=</span>[<span class="st">'Child</span><span class="ch">\'</span><span class="st">s Play (1988)'</span>,<span class="st">'Rushmore'</span>,<span class="st">'brothers Bloom'</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                              <span class="st">'call me by your name'</span>, <span class="st">'Jumanji (1995)'</span>,<span class="st">'The Three Amigos'</span>],</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                    title<span class="op">=</span><span class="st">"Dave's Fast.AI Movie Recommender"</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                    article<span class="op">=</span><span class="st">'This recommender uses a collaborative filtering model fashioned from the [Fast.AI](https://github.com/fastai/fastbook/blob/master/08_collab.ipynb) library and trained on the 9 million movie reviews from the [Movie Lense Dataset](https://grouplens.org/datasets/movielens/25m/).  It trains Latent Factors to give movies and users descriptive weights that help predict thier reivews based on these factors.  The model was trained completely WITHOUT titles, descriptions, or categories and amazingly these things can be added to imporove this model.  Enjoy!'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="actually-try-the-model-here" class="level2">
+<h2 class="anchored" data-anchor-id="actually-try-the-model-here">Actually Try the Model HERE</h2>
+<blockquote class="blockquote">
+<p>Now we launch it so it can be used literally here in the <code>jupyter notebook</code></p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>intf.launch(inline<span class="op">=</span><span class="va">True</span>, <span class="co">#when True publishes the page in notebook</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>        share<span class="op">=</span><span class="va">False</span>, quiet<span class="op">=</span><span class="va">True</span>, width<span class="op">=</span><span class="dv">600</span>, height<span class="op">=</span><span class="dv">700</span>) <span class="co">#when share=True automatically publishes the app to the gradio website for 72 hours.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running on local URL:  http://127.0.0.1:7862</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div><iframe src="http://127.0.0.1:7862/" width="600" height="700" allow="autoplay; camera; microphone; clipboard-read; clipboard-write;" frameborder="0" allowfullscreen=""></iframe></div>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>(&lt;gradio.routes.App&gt;, 'http://127.0.0.1:7862/', None)</code></pre>
+</div>
+</div>
+</section>
+<section id="example-without-gradio" class="level2">
+<h2 class="anchored" data-anchor-id="example-without-gradio">Example Without Gradio:</h2>
+<blockquote class="blockquote">
+<p>Here is an example of the model being used straight from the <a href="https://daveramseymusic.github.io/movie-rec/movie_recommender.html#get_movie_recs"><code>get_movie_recs</code></a> function, recommending movies similar to one of my favorites.</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>favorite_movie <span class="op">=</span> <span class="st">'Beasts of the Southern Wild (2012)'</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>get_movie_recs(full_title<span class="op">=</span>favorite_movie, learn<span class="op">=</span>learn, df_titles<span class="op">=</span>df_titles)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>['Beasts of the Southern Wild (2012)',
+ 'No Country for Old Men (2007)',
+ 'Wrestler, The (2008)',
+ 'Leaving Las Vegas (1995)',
+ 'City of God (Cidade de Deus) (2002)',
+ 'Talk to Her (Hable con Ella) (2002)',
+ 'Antichrist (2009)',
+ 'Nocturnal Animals',
+ 'Requiem for a Dream (2000)',
+ 'Magnolia (1999)',
+ 'In the Company of Men (1997)',
+ 'Old Boy (2003)',
+ 'Enemy (2013)',
+ '12 Angry Men (1957)',
+ 'Samouraï, Le (Godson, The) (1967)',
+ 'Bringing Out the Dead (1999)',
+ 'Eyes Wide Shut (1999)',
+ 'Mulholland Drive (2001)',
+ 'Punch-Drunk Love (2002)',
+ 'Shallow Grave (1994)',
+ 'Birdman: Or (The Unexpected Virtue of Ignorance) (2014)',
+ 'Taxi Driver (1976)',
+ 'Black Swan (2010)',
+ 'American Beauty (1999)',
+ 'Broken Flowers (2005)',
+ "Winter's Bone (2010)",
+ 'Little Miss Sunshine (2006)',
+ 'Hunt, The (Jagten) (2012)',
+ 'Control (2007)',
+ 'The Machinist (2004)']</code></pre>
+</div>
+</div>
+</section>
+<section id="how-does-this-work" class="level2">
+<h2 class="anchored" data-anchor-id="how-does-this-work">How does this work?</h2>
+<blockquote class="blockquote">
+<p>Click <a href="https://www.kaggle.com/code/jhoward/collaborative-filtering-deep-dive?scriptVersionId=99475018&amp;cellId=13">HERE</a> for the full fast.ai lesson explaination.</p>
+</blockquote>
+<p>The model is trained on 3 pieces of data. Movie_Id, User_Id, and Movie_Rating. So how can we discern which movies are similar to each other? The answer is “Latent Factors.”</p>
+<p>How do Latent factors work? &gt; Let’s say john loves movies that score high in 3 categories: Action, Science Fiction Old(though old he doesn’t care about as much). we can reprsent this as an array with scores between -1 and 1: [Action, Scifi, Old]</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>john <span class="op">=</span> np.array([<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">.8</span>]) <span class="co"># [action, scifi, old]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we look a the movie The Last Skywalker and score that with the same system. It has a lot of action but not craaazy amounts action so we’ll score that .9. It’s definitely scifi so we score that 1 but it isn’t old so we’l score that -.9.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>last_skywalker <span class="op">=</span> np.array([<span class="dv">1</span>,<span class="fl">.9</span>,<span class="op">-</span><span class="fl">.9</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we multiply those together to create a matching score</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>john<span class="op">*</span>last_skywalker</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([1.  , 1.  , 0.64])</code></pre>
+</div>
+</div>
+<p>Then we can sum it together to get a single score:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(john<span class="op">*</span>last_skywalker).<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>2.64</code></pre>
+</div>
+</div>
+<p>This is called the dot product.</p>
+</section>
+<section id="lets-try-another-movie" class="level1">
+<h1>Let’s try another movie</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>casablanca <span class="op">=</span> np.array([<span class="op">-</span><span class="fl">0.99</span>,<span class="op">-</span><span class="fl">0.3</span>,<span class="fl">0.8</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Casablanca is a much worse match for John</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(john<span class="op">*</span>casablanca).<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>-0.6499999999999999</code></pre>
+</div>
+</div>
+<p>This score can be used to help us predict how someone would rate a movie and that system can be optimized with machine learning.</p>
+<section id="not-enough-data" class="level4">
+<h4 class="anchored" data-anchor-id="not-enough-data">Not enough data?</h4>
+<p>Our problem is that we actually don’t know the users preferences and we don’t have categories for the movies, but we DO have the users ratings of the movies.</p>
+</section>
+<section id="solution" class="level4">
+<h4 class="anchored" data-anchor-id="solution">Solution:</h4>
+<p>Instead of specific categories, create space for categories and fill them with random numbers. We then use the movie ratings we have and train the random nubers using Stochastic Gradient Descent(SGD) to make these random nubmers useful for predicting all the users ratings.</p>
+<p>Now we have useful categories that were created from randomness and and can be used to show similar users and similar movies as wel as predict a users likely rating.</p>
+</section>
+<section id="can-we-add-more-categories-and-info" class="level3">
+<h3 class="anchored" data-anchor-id="can-we-add-more-categories-and-info">Can we add more categories and Info?</h3>
+<blockquote class="blockquote">
+<p>Yes.</p>
+</blockquote>
+<p>That is the next step to optimize the model. This can be done by changing the model from a <code>Dot Product</code> model to a <code>Neural Network</code> where you can add categories.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
